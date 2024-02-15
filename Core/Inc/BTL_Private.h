@@ -12,38 +12,45 @@
 #define BTL_V_MINOR '1'
 #define BTL_V_PATCH '1'
 
-#define BTL_DATA_RECORD_TYPE    0
-#define BTL_EXTEND_RECORD_TYPE  1
+#define BTL_CC_0                  0
+#define BTL_CC_1                  1
 
-#define BTL_CC_0                0
-#define BTL_CC_1                1
+#define BTL_ADD_0                 2
+#define BTL_ADD_1                 3
+#define BTL_ADD_2                 4
+#define BTL_ADD_3                 5
 
-#define BTL_ADD_0               2
-#define BTL_ADD_1               3
-#define BTL_ADD_2               4
-#define BTL_ADD_3               5
+#define BTL_RT_0                  6
+#define BTL_RT_1                  7
 
-#define BTL_RT_0                6
-#define BTL_RT_1                7
+#define BTL_DATA_0                8
+#define BTL_DATA_1                9
+#define BTL_DATA_2                10
+#define BTL_DATA_3                11
 
-#define BTL_DATA_0              8
-#define BTL_DATA_1              9
-#define BTL_DATA_2              10
-#define BTL_DATA_3              11
+#define BTL_FULL_ADD0             0
+#define BTL_FULL_ADD1             1
+#define BTL_FULL_ADD2             2
+#define BTL_FULL_ADD3             3
+#define BTL_FULL_ADD4             4
+#define BTL_FULL_ADD5             5
+#define BTL_FULL_ADD6             6
+#define BTL_FULL_ADD7             7
 
+#define BTL_CMD_TYPE              2
 
-#define BTL_CMD_TYPE            2
+#define BTL_BUFFER_RECORDS0       4
 
-#define BTL_BUFFER_RECORDS0     4
+#define BTL_DONE_FLAG             3
 
-#define BTL_DONE_FLAG           3
+#define BTL_BUFFER_NEXT_SIZE0     5
+#define BTL_BUFFER_NEXT_SIZE1     6
 
-#define BTL_BUFFER_NEXT_SIZE0   5
-#define BTL_BUFFER_NEXT_SIZE1   6
+#define BTL_DATA_START            7
 
-#define BTL_DATA_START          7
+#define MAX_TIMEOUT               50
 
-#define MAX_TIMEOUT             150
+#define BTL_BOOTLOADER_SIZE       0x8000 /* 32 Kilobyte */
 
 typedef struct
 {
@@ -56,6 +63,7 @@ typedef struct
   uint16_t BTL_BUFFER_POINTER;
   uint16_t BTL_ADDRESS_HIGH;
   uint8_t BTL_NO_OF_BUFFER_RECORDS;
+  uint8_t BTL_ADDRESS_TYPE;
 } BTL_RecordTypeDef;
 
 typedef enum
@@ -63,6 +71,17 @@ typedef enum
   BTL_OK       = 0x00U,
   BTL_ERROR    = 0x01U,
 } BTL_StatusTypeDef;
+
+
+typedef enum
+{
+  BTL_DATA_RECORD_TYPE           = 0x00U, /* Data Record */
+  BTL_EOF_RECORD_TYPE            = 0x01U, /* End-of-File Record */
+  BTL_EXT_SEGMENT_ADDR_RECORD    = 0x02U, /* Extended Segment Address Record */
+  BTL_EXT_LINEAR_ADDR_RECORD     = 0x04U, /* Extended Linear Address Record */
+  BTL_START_LINEAR_ADDR_RECORD   = 0x05U, /* Start Linear Address Record (MDK-ARM only) */
+} BTL_RecordTypeTypeDef;
+
 
 typedef enum
 {

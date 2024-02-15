@@ -104,7 +104,7 @@ int main(void)
 	  receivedCMD = BTL_GetMessage(dataBuffer);
 	  if (receivedCMD != BTL_ERROR_CMD)
 	  {
-		  dataLength = dataBuffer[BTL_DATA_SIZE0] << 1 | dataBuffer[BTL_DATA_SIZE1];
+		  dataLength = dataBuffer[BTL_DATA_SIZE0] << 4 | dataBuffer[BTL_DATA_SIZE1];
 		  switch(receivedCMD)
 		  {
 		  case BTL_GET_VER_CMD: BTL_GetVersion(); break;
