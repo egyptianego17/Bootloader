@@ -48,9 +48,15 @@
 
 #define BTL_DATA_START            7
 
-#define MAX_TIMEOUT               50
+#define MAX_TIMEOUT               5
 
 #define BTL_BOOTLOADER_SIZE       0x8000 /* 32 Kilobyte */
+
+#define BTL_MIN_ADDRESS 		  0x08000000
+#define BTL_MAX_ADDRESS 		  0x0805FFFF
+
+#define BTL_MIN_CC 		          0x00
+#define BTL_MAX_CC 		          0x10
 
 typedef struct
 {
@@ -63,7 +69,6 @@ typedef struct
   uint16_t BTL_BUFFER_POINTER;
   uint16_t BTL_ADDRESS_HIGH;
   uint8_t BTL_NO_OF_BUFFER_RECORDS;
-  uint8_t BTL_ADDRESS_TYPE;
 } BTL_RecordTypeDef;
 
 typedef enum

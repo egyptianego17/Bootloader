@@ -19,6 +19,7 @@ Core/Src/BTL_Program.o: ../Core/Src/BTL_Program.c ../Core/Inc/usart.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma_ex.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_cortex.h \
+ ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_crc.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ex.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ramfunc.h \
@@ -26,7 +27,7 @@ Core/Src/BTL_Program.o: ../Core/Src/BTL_Program.c ../Core/Inc/usart.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h \
  ../Core/Inc/BTL_Private.h ../Core/Inc/BTL_Config.h \
- ../Core/Inc/BTL_Interface.h ../Core/Inc/BTL_Private.h
+ ../Core/Inc/BTL_Interface.h ../Core/Inc/BTL_Private.h ../Core/Inc/crc.h
 ../Core/Inc/usart.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
@@ -49,6 +50,7 @@ Core/Src/BTL_Program.o: ../Core/Src/BTL_Program.c ../Core/Inc/usart.h \
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma_ex.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_cortex.h:
+../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_crc.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ex.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ramfunc.h:
@@ -59,3 +61,4 @@ Core/Src/BTL_Program.o: ../Core/Src/BTL_Program.c ../Core/Inc/usart.h \
 ../Core/Inc/BTL_Config.h:
 ../Core/Inc/BTL_Interface.h:
 ../Core/Inc/BTL_Private.h:
+../Core/Inc/crc.h:

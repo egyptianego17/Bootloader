@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "crc.h"
 #include "usart.h"
 #include "gpio.h"
 #include "BTL_Interface.h"
@@ -77,7 +78,7 @@ int main(void)
   uint8_t* dataBuffer;
   BTL_CMDTypeDef receivedCMD;
   uint16_t dataLength = NULL;
-  dataBuffer = (uint8_t*)calloc(DATA_BUFFER_SIZE, sizeof(uint8_t));   /* 1 Kb Buffer to hold the messages */
+  dataBuffer = (uint8_t*)calloc(DATA_BUFFER_SIZE, sizeof(uint8_t));   /* 2 Kb Buffer to hold the messages */
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -91,6 +92,7 @@ int main(void)
   MX_GPIO_Init();
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
+  MX_CRC_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */

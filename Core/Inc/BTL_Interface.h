@@ -25,5 +25,7 @@ BTL_StatusTypeDef BTL_UpdateFirmware(uint8_t* messageBuffer, uint16_t dataLength
 uint8_t BTL_ASCHIIToHex(uint8_t ASCHIIValue);
 BTL_StatusTypeDef BTL_HexFlasher(uint8_t* dataBuffer, BTL_RecordTypeDef* currentRecord);
 BTL_StatusTypeDef BTL_FlashWrite(uint8_t* dataBuffer, uint16_t datalength, BTL_RecordTypeDef* currentRecord);
+BTL_StatusTypeDef BTL_CheckRecord(uint8_t* dataBuffer ,BTL_RecordTypeDef* currentRecord);
+uint8_t CalculateChecksum(const uint8_t *data, size_t length);
 
 #endif /* INC_BTL_INTERFACE_H_ */
