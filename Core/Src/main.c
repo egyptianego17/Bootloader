@@ -105,12 +105,15 @@ int main(void)
 
 	  /* Clear the buffer before reception  */
 	  memset(dataBuffer, 0, DATA_BUFFER_SIZE);
+	  __HAL_UART_FLUSH_DRREGISTER(&huart1);  /* Flush the data register      */
+	  __HAL_UART_CLEAR_OREFLAG(&huart1);     /* Clear the overrun flag       */
+	  HAL_UART_AbortReceive(&huart1);        /* Abort the ongoing reception  */
 
 	  /* Getting command type from the host */
 	  receivedCMD = BTL_GetMessage(dataBuffer);
 	  if (receivedCMD != BTL_ERROR_CMD)
 	  {
-
+		  /* Calculate the dataLength to be received if it exists */
 		  dataLength = dataBuffer[BTL_DATA_SIZE0] << 4 | dataBuffer[BTL_DATA_SIZE1];
 		  switch(receivedCMD)
 		  {
