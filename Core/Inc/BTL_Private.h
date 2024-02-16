@@ -1,9 +1,9 @@
-/*
- * BTL_Interface.h
- *
- *  Created on: Jan 27, 2024
- *      Author: Xavi Omar
- */
+/*****************************************************/
+/*                 SWC: Bootloader                   */
+/*            Author: Abdulrahman Omar               */
+/*                 Version: v 1.0                    */
+/*              Date: 27 Jan - 2024                  */
+/*****************************************************/
 
 #ifndef INC_BTL_PRIVATE_H_
 #define INC_BTL_PRIVATE_H_
@@ -97,19 +97,14 @@ typedef enum
 /* Enumeration for Bootloader Commands */
 typedef enum
 {
-	BTL_GET_VER_CMD              = 0x10U,
-	BTL_GET_HELP_CMD             = 0x11U,
-	BTL_GET_CID_CMD              = 0x12U,
-	BTL_GET_RDP_STATUS_CMD       = 0x13U,
-	BTL_GO_TO_ADDR_CMD           = 0x14U,
-	BTL_FLASH_ERASE_CMD          = 0x15U,
-	BTL_MEM_WRITE_CMD            = 0x16U,
-	BTL_ED_W_PROTECT_CMD         = 0x17U,
-	BTL_MEM_READ_CMD             = 0x18U,
-	BTL_READ_SECTOR_STATUS_CMD   = 0x19U,
-	BTL_OTP_READ_CMD             = 0x20U,
-	BTL_CHANGE_ROP_Level_CMD     = 0x21U,
-	BTL_ERROR_CMD                = 0x22U,
+	BTL_GET_VERSION              = 0x01U,
+	BTL_GET_HELP                 = 0x02U,
+	BTL_GET_ID                   = 0x03U,
+	BTL_APP_FLASH                = 0x04U,
+	BTL_FLASH_ERASE              = 0x05U,
+	BTL_MEM_READ                 = 0x06U,
+	BTL_OTP_READ                 = 0x07U,
+	BTL_ERROR_CMD                = 0x08U,
 } BTL_CMDTypeDef;
 
 #endif /* INC_BTL_PRIVATE_H_ */

@@ -1,9 +1,9 @@
-/*
- * BTL_Program.c
- *
- *  Created on: Jan 27, 2024
- *      Author: Xavi Omar
- */
+/*****************************************************/
+/*                 SWC: Bootloader                   */
+/*            Author: Abdulrahman Omar               */
+/*                 Version: v 1.0                    */
+/*              Date: 27 Jan - 2024                  */
+/*****************************************************/
 
 #include "usart.h"
 #include "stm32f4xx_hal_flash.h"
@@ -14,6 +14,15 @@
 #include "BTL_Config.h"
 #include "BTL_Interface.h"
 #include "crc.h"
+
+static BTL_StatusTypeDef BTL_SendAck(BTL_CMDTypeDef cmdID);
+static BTL_StatusTypeDef BTL_SendNAck();
+static uint8_t BTL_ASCHIIToHex(uint8_t ASCHIIValue);
+static BTL_StatusTypeDef BTL_HexFlasher(uint8_t* dataBuffer, BTL_RecordTypeDef* currentRecord);
+static BTL_StatusTypeDef BTL_FlashWrite(uint8_t* dataBuffer, uint16_t dataLength, BTL_RecordTypeDef* currentRecord);
+static BTL_StatusTypeDef BTL_CheckRecord(uint8_t* dataBuffer, BTL_RecordTypeDef* currentRecord);
+static uint8_t CalculateChecksum(const uint8_t *data, size_t length);
+
 
 /**
  * @brief Send a formatted message over UART.
@@ -66,7 +75,7 @@ BTL_CMDTypeDef BTL_GetMessage(uint8_t* messageBuffer)
  * @param cmdID ID of the command to acknowledge.
  * @return BTL_StatusTypeDef Status of the acknowledgment transmission.
  */
-BTL_StatusTypeDef BTL_SendAck(BTL_CMDTypeDef cmdID)
+static BTL_StatusTypeDef BTL_SendAck(BTL_CMDTypeDef cmdID)
 {
     BTL_StatusTypeDef BTL_STATUS = BTL_ERROR;
     /* Send cmd ID as Acknowledgment */
@@ -81,7 +90,7 @@ BTL_StatusTypeDef BTL_SendAck(BTL_CMDTypeDef cmdID)
  * @brief Send a negative acknowledgment.
  * @return BTL_StatusTypeDef Status of the negative acknowledgment transmission.
  */
-BTL_StatusTypeDef BTL_SendNAck()
+static BTL_StatusTypeDef BTL_SendNAck()
 {
     BTL_StatusTypeDef BTL_STATUS = BTL_ERROR;
     /* Send ID as A */
@@ -123,7 +132,7 @@ BTL_StatusTypeDef BTL_UpdateFirmware(uint8_t* messageBuffer, uint16_t dataLength
     BTL_StatusTypeDef BTL_DONE = BTL_ERROR;
 
     /* Transmit an acknowledgment to signal MCU readiness for flashing */
-    if (BTL_SendAck(BTL_MEM_WRITE_CMD) != BTL_OK) {
+    if (BTL_SendAck(BTL_APP_FLASH) != BTL_OK) {
         return BTL_ERROR;
     }
 
@@ -181,7 +190,7 @@ BTL_StatusTypeDef BTL_UpdateFirmware(uint8_t* messageBuffer, uint16_t dataLength
             /* Check for any allocation errors */
             if (BTL_FLASH_STATUS == BTL_OK)
             {
-                BTL_SendAck(BTL_MEM_WRITE_CMD);
+                BTL_SendAck(BTL_APP_FLASH);
                 BTL_STATUS = BTL_OK;
             }
             else
@@ -229,7 +238,7 @@ BTL_StatusTypeDef BTL_UpdateFirmware(uint8_t* messageBuffer, uint16_t dataLength
  * @param ASCHIIValue ASCII representation of the hex value.
  * @return uint8_t Equivalent integer value.
  */
-uint8_t BTL_ASCHIIToHex(uint8_t ASCHIIValue)
+static uint8_t BTL_ASCHIIToHex(uint8_t ASCHIIValue)
 {
     if ((ASCHIIValue >= '0') && (ASCHIIValue <= '9'))
     {
@@ -253,7 +262,7 @@ uint8_t BTL_ASCHIIToHex(uint8_t ASCHIIValue)
  * @param currentRecord Structure containing record information.
  * @return BTL_StatusTypeDef Status of the flashing operation.
  */
-BTL_StatusTypeDef BTL_HexFlasher(uint8_t* dataBuffer, BTL_RecordTypeDef* currentRecord)
+static BTL_StatusTypeDef BTL_HexFlasher(uint8_t* dataBuffer, BTL_RecordTypeDef* currentRecord)
 {
     BTL_StatusTypeDef BTL_STATUS = BTL_OK;
 
@@ -348,7 +357,7 @@ BTL_StatusTypeDef BTL_HexFlasher(uint8_t* dataBuffer, BTL_RecordTypeDef* current
  * @param currentRecord Structure containing record information.
  * @return BTL_StatusTypeDef Status of the Flash write operation.
  */
-BTL_StatusTypeDef BTL_FlashWrite(uint8_t* dataBuffer, uint16_t dataLength, BTL_RecordTypeDef* currentRecord)
+static BTL_StatusTypeDef BTL_FlashWrite(uint8_t* dataBuffer, uint16_t dataLength, BTL_RecordTypeDef* currentRecord)
 {
     BTL_StatusTypeDef BTL_STATUS = BTL_ERROR;
 
@@ -384,7 +393,7 @@ BTL_StatusTypeDef BTL_FlashWrite(uint8_t* dataBuffer, uint16_t dataLength, BTL_R
  * @param currentRecord Structure containing record information.
  * @return BTL_StatusTypeDef Status of the record integrity check.
  */
-BTL_StatusTypeDef BTL_CheckRecord(uint8_t* dataBuffer, BTL_RecordTypeDef* currentRecord) {
+static BTL_StatusTypeDef BTL_CheckRecord(uint8_t* dataBuffer, BTL_RecordTypeDef* currentRecord) {
     BTL_StatusTypeDef BTL_STATUS = BTL_ERROR;
 
     /* Validate the address and the character count */
@@ -421,7 +430,7 @@ BTL_StatusTypeDef BTL_CheckRecord(uint8_t* dataBuffer, BTL_RecordTypeDef* curren
  * @param length Length of the data buffer.
  * @return uint8_t Calculated checksum value.
  */
-uint8_t CalculateChecksum(const uint8_t *data, size_t length)
+static uint8_t CalculateChecksum(const uint8_t *data, size_t length)
 {
     uint16_t sum = 0;
 

@@ -29,23 +29,23 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY
  12 .comment      00000043  00000000  00000000  0002008c  2**0
                   CONTENTS, READONLY
- 13 .debug_info   0000a258  00000000  00000000  000200cf  2**0
+ 13 .debug_info   0000a21e  00000000  00000000  000200cf  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_abbrev 0000228e  00000000  00000000  0002a327  2**0
+ 14 .debug_abbrev 000022bc  00000000  00000000  0002a2ed  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_aranges 00000958  00000000  00000000  0002c5b8  2**3
+ 15 .debug_aranges 00000958  00000000  00000000  0002c5b0  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_rnglists 00000701  00000000  00000000  0002cf10  2**0
+ 16 .debug_rnglists 00000701  00000000  00000000  0002cf08  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_macro  000164fd  00000000  00000000  0002d611  2**0
+ 17 .debug_macro  000164fd  00000000  00000000  0002d609  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_line   0000d1fd  00000000  00000000  00043b0e  2**0
+ 18 .debug_line   0000d1f6  00000000  00000000  00043b06  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_str    00085f57  00000000  00000000  00050d0b  2**0
+ 19 .debug_str    00085ecb  00000000  00000000  00050cfc  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .debug_frame  00002958  00000000  00000000  000d6c64  2**2
+ 20 .debug_frame  00002958  00000000  00000000  000d6bc8  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_line_str 0000006a  00000000  00000000  000d95bc  2**0
+ 21 .debug_line_str 0000006a  00000000  00000000  000d9520  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -494,7 +494,7 @@ BTL_CMDTypeDef BTL_GetMessage(uint8_t* messageBuffer)
  8000604:	af00      	add	r7, sp, #0
  8000606:	6078      	str	r0, [r7, #4]
     BTL_CMDTypeDef BTL_CMD = BTL_ERROR_CMD;
- 8000608:	2322      	movs	r3, #34	; 0x22
+ 8000608:	2308      	movs	r3, #8
  800060a:	73fb      	strb	r3, [r7, #15]
 
     /* Get the size of the data & command type */
@@ -530,7 +530,7 @@ BTL_CMDTypeDef BTL_GetMessage(uint8_t* messageBuffer)
  * @param cmdID ID of the command to acknowledge.
  * @return BTL_StatusTypeDef Status of the acknowledgment transmission.
  */
-BTL_StatusTypeDef BTL_SendAck(BTL_CMDTypeDef cmdID)
+static BTL_StatusTypeDef BTL_SendAck(BTL_CMDTypeDef cmdID)
 {
  8000638:	b580      	push	{r7, lr}
  800063a:	b084      	sub	sp, #16
@@ -568,7 +568,7 @@ BTL_StatusTypeDef BTL_SendAck(BTL_CMDTypeDef cmdID)
  * @brief Send a negative acknowledgment.
  * @return BTL_StatusTypeDef Status of the negative acknowledgment transmission.
  */
-BTL_StatusTypeDef BTL_SendNAck()
+static BTL_StatusTypeDef BTL_SendNAck()
 {
  8000668:	b580      	push	{r7, lr}
  800066a:	b082      	sub	sp, #8
@@ -657,8 +657,8 @@ BTL_StatusTypeDef BTL_UpdateFirmware(uint8_t* messageBuffer, uint16_t dataLength
  80006d6:	75bb      	strb	r3, [r7, #22]
 
     /* Transmit an acknowledgment to signal MCU readiness for flashing */
-    if (BTL_SendAck(BTL_MEM_WRITE_CMD) != BTL_OK) {
- 80006d8:	2016      	movs	r0, #22
+    if (BTL_SendAck(BTL_APP_FLASH) != BTL_OK) {
+ 80006d8:	2004      	movs	r0, #4
  80006da:	f7ff ffad 	bl	8000638 <BTL_SendAck>
  80006de:	4603      	mov	r3, r0
  80006e0:	2b00      	cmp	r3, #0
@@ -787,8 +787,8 @@ BTL_StatusTypeDef BTL_UpdateFirmware(uint8_t* messageBuffer, uint16_t dataLength
  800077c:	2b00      	cmp	r3, #0
  800077e:	d11d      	bne.n	80007bc <BTL_UpdateFirmware+0xf8>
             {
-                BTL_SendAck(BTL_MEM_WRITE_CMD);
- 8000780:	2016      	movs	r0, #22
+                BTL_SendAck(BTL_APP_FLASH);
+ 8000780:	2004      	movs	r0, #4
  8000782:	f7ff ff59 	bl	8000638 <BTL_SendAck>
                 BTL_STATUS = BTL_OK;
  8000786:	2300      	movs	r3, #0
@@ -899,7 +899,7 @@ BTL_StatusTypeDef BTL_UpdateFirmware(uint8_t* messageBuffer, uint16_t dataLength
  * @param ASCHIIValue ASCII representation of the hex value.
  * @return uint8_t Equivalent integer value.
  */
-uint8_t BTL_ASCHIIToHex(uint8_t ASCHIIValue)
+static uint8_t BTL_ASCHIIToHex(uint8_t ASCHIIValue)
 {
  8000814:	b480      	push	{r7}
  8000816:	b083      	sub	sp, #12
@@ -963,7 +963,7 @@ uint8_t BTL_ASCHIIToHex(uint8_t ASCHIIValue)
  * @param currentRecord Structure containing record information.
  * @return BTL_StatusTypeDef Status of the flashing operation.
  */
-BTL_StatusTypeDef BTL_HexFlasher(uint8_t* dataBuffer, BTL_RecordTypeDef* currentRecord)
+static BTL_StatusTypeDef BTL_HexFlasher(uint8_t* dataBuffer, BTL_RecordTypeDef* currentRecord)
 {
  8000868:	b5f0      	push	{r4, r5, r6, r7, lr}
  800086a:	b085      	sub	sp, #20
@@ -1503,7 +1503,7 @@ BTL_StatusTypeDef BTL_HexFlasher(uint8_t* dataBuffer, BTL_RecordTypeDef* current
  * @param currentRecord Structure containing record information.
  * @return BTL_StatusTypeDef Status of the Flash write operation.
  */
-BTL_StatusTypeDef BTL_FlashWrite(uint8_t* dataBuffer, uint16_t dataLength, BTL_RecordTypeDef* currentRecord)
+static BTL_StatusTypeDef BTL_FlashWrite(uint8_t* dataBuffer, uint16_t dataLength, BTL_RecordTypeDef* currentRecord)
 {
  8000bf8:	b580      	push	{r7, lr}
  8000bfa:	b086      	sub	sp, #24
@@ -1591,7 +1591,7 @@ BTL_StatusTypeDef BTL_FlashWrite(uint8_t* dataBuffer, uint16_t dataLength, BTL_R
  * @param currentRecord Structure containing record information.
  * @return BTL_StatusTypeDef Status of the record integrity check.
  */
-BTL_StatusTypeDef BTL_CheckRecord(uint8_t* dataBuffer, BTL_RecordTypeDef* currentRecord) {
+static BTL_StatusTypeDef BTL_CheckRecord(uint8_t* dataBuffer, BTL_RecordTypeDef* currentRecord) {
  8000c60:	b590      	push	{r4, r7, lr}
  8000c62:	b087      	sub	sp, #28
  8000c64:	af00      	add	r7, sp, #0
@@ -1730,7 +1730,7 @@ BTL_StatusTypeDef BTL_CheckRecord(uint8_t* dataBuffer, BTL_RecordTypeDef* curren
  * @param length Length of the data buffer.
  * @return uint8_t Calculated checksum value.
  */
-uint8_t CalculateChecksum(const uint8_t *data, size_t length)
+static uint8_t CalculateChecksum(const uint8_t *data, size_t length)
 {
  8000d38:	b480      	push	{r7}
  8000d3a:	b085      	sub	sp, #20
@@ -1926,24 +1926,19 @@ void MX_GPIO_Init(void)
  8000e40:	40020000 	.word	0x40020000
 
 08000e44 <main>:
-/**
-  * @brief  The application entry point.
-  * @retval int
-  */
+
+/* Private function prototypes -----------------------------------------------*/
+void SystemClock_Config(void);
+
 int main(void)
 {
  8000e44:	b580      	push	{r7, lr}
  8000e46:	b084      	sub	sp, #16
  8000e48:	af00      	add	r7, sp, #0
-  /* USER CODE END 1 */
-
-  /* MCU Configuration--------------------------------------------------------*/
-
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
  8000e4a:	f000 fab1 	bl	80013b0 <HAL_Init>
 
-  /* USER CODE BEGIN Init */
   uint8_t* dataBuffer;
   BTL_CMDTypeDef receivedCMD;
   uint16_t dataLength = 0;
@@ -1955,14 +1950,10 @@ int main(void)
  8000e58:	f002 faa4 	bl	80033a4 <calloc>
  8000e5c:	4603      	mov	r3, r0
  8000e5e:	60bb      	str	r3, [r7, #8]
-  /* USER CODE END Init */
 
   /* Configure the system clock */
   SystemClock_Config();
  8000e60:	f000 f8ac 	bl	8000fbc <SystemClock_Config>
-  /* USER CODE BEGIN SysInit */
-
-  /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
@@ -1973,21 +1964,20 @@ int main(void)
  8000e6c:	f000 f9d0 	bl	8001210 <MX_USART2_UART_Init>
   MX_CRC_Init();
  8000e70:	f7ff ff86 	bl	8000d80 <MX_CRC_Init>
+
   while (1)
   {
-    /* USER CODE END WHILE */
-
 	  /* Clear the buffer before reception  */
 	  memset(dataBuffer, 0, DATA_BUFFER_SIZE);
  8000e74:	f44f 6200 	mov.w	r2, #2048	; 0x800
  8000e78:	2100      	movs	r1, #0
  8000e7a:	68b8      	ldr	r0, [r7, #8]
  8000e7c:	f002 fba6 	bl	80035cc <memset>
-	    __HAL_UART_FLUSH_DRREGISTER(&huart1);  // Flush the data register
+	  __HAL_UART_FLUSH_DRREGISTER(&huart1);  /* Flush the data register      */
  8000e80:	4b4b      	ldr	r3, [pc, #300]	; (8000fb0 <main+0x16c>)
  8000e82:	681b      	ldr	r3, [r3, #0]
  8000e84:	685b      	ldr	r3, [r3, #4]
-	    __HAL_UART_CLEAR_OREFLAG(&huart1);     // Clear the overrun flag
+	  __HAL_UART_CLEAR_OREFLAG(&huart1);     /* Clear the overrun flag       */
  8000e86:	2300      	movs	r3, #0
  8000e88:	603b      	str	r3, [r7, #0]
  8000e8a:	4b49      	ldr	r3, [pc, #292]	; (8000fb0 <main+0x16c>)
@@ -1999,9 +1989,10 @@ int main(void)
  8000e96:	685b      	ldr	r3, [r3, #4]
  8000e98:	603b      	str	r3, [r7, #0]
  8000e9a:	683b      	ldr	r3, [r7, #0]
-	    HAL_UART_AbortReceive(&huart1);        // Abort the ongoing reception
+	  HAL_UART_AbortReceive(&huart1);        /* Abort the ongoing reception  */
  8000e9c:	4844      	ldr	r0, [pc, #272]	; (8000fb0 <main+0x16c>)
  8000e9e:	f001 fead 	bl	8002bfc <HAL_UART_AbortReceive>
+
 	  /* Getting command type from the host */
 	  receivedCMD = BTL_GetMessage(dataBuffer);
  8000ea2:	68b8      	ldr	r0, [r7, #8]
@@ -2010,10 +2001,10 @@ int main(void)
  8000eaa:	71fb      	strb	r3, [r7, #7]
 	  if (receivedCMD != BTL_ERROR_CMD)
  8000eac:	79fb      	ldrb	r3, [r7, #7]
- 8000eae:	2b22      	cmp	r3, #34	; 0x22
+ 8000eae:	2b08      	cmp	r3, #8
  8000eb0:	d0e0      	beq.n	8000e74 <main+0x30>
 	  {
-
+		  /* Calculate the dataLength to be received if it exists */
 		  dataLength = dataBuffer[BTL_DATA_SIZE0] << 4 | dataBuffer[BTL_DATA_SIZE1];
  8000eb2:	68bb      	ldr	r3, [r7, #8]
  8000eb4:	781b      	ldrb	r3, [r3, #0]
@@ -2028,7 +2019,7 @@ int main(void)
  8000ec6:	81fb      	strh	r3, [r7, #14]
 		  switch(receivedCMD)
  8000ec8:	79fb      	ldrb	r3, [r7, #7]
- 8000eca:	3b10      	subs	r3, #16
+ 8000eca:	3b01      	subs	r3, #1
  8000ecc:	2b06      	cmp	r3, #6
  8000ece:	d860      	bhi.n	8000f92 <main+0x14e>
  8000ed0:	a201      	add	r2, pc, #4	; (adr r2, 8000ed8 <main+0x94>)
@@ -2036,16 +2027,16 @@ int main(void)
  8000ed6:	bf00      	nop
  8000ed8:	08000ef5 	.word	0x08000ef5
  8000edc:	08000efb 	.word	0x08000efb
- 8000ee0:	08000f6b 	.word	0x08000f6b
- 8000ee4:	08000f17 	.word	0x08000f17
+ 8000ee0:	08000f17 	.word	0x08000f17
+ 8000ee4:	08000f87 	.word	0x08000f87
  8000ee8:	08000f33 	.word	0x08000f33
  8000eec:	08000f4f 	.word	0x08000f4f
- 8000ef0:	08000f87 	.word	0x08000f87
+ 8000ef0:	08000f6b 	.word	0x08000f6b
 		  {
-		  case BTL_GET_VER_CMD: BTL_GetVersion(); break;
+		  case BTL_GET_VERSION: BTL_GetVersion(); break;
  8000ef4:	f7ff fbce 	bl	8000694 <BTL_GetVersion>
  8000ef8:	e059      	b.n	8000fae <main+0x16a>
-		  case BTL_GET_HELP_CMD: BTL_SendMessage("Sent command is: %d, Size %c%c\n", dataBuffer[2],dataBuffer[0], dataBuffer[1]); break;
+		  case BTL_GET_HELP: BTL_SendMessage("Sent command is: %d, Size %c%c\n", dataBuffer[2],dataBuffer[0], dataBuffer[1]); break;
  8000efa:	68bb      	ldr	r3, [r7, #8]
  8000efc:	3302      	adds	r3, #2
  8000efe:	781b      	ldrb	r3, [r3, #0]
@@ -2059,7 +2050,7 @@ int main(void)
  8000f0e:	4829      	ldr	r0, [pc, #164]	; (8000fb4 <main+0x170>)
  8000f10:	f7ff fb34 	bl	800057c <BTL_SendMessage>
  8000f14:	e04b      	b.n	8000fae <main+0x16a>
-		  case BTL_GET_RDP_STATUS_CMD: BTL_SendMessage("Sent command is: %d, Size %c%c\n", dataBuffer[2],dataBuffer[0], dataBuffer[1]); break;
+		  case BTL_GET_ID: BTL_SendMessage("Sent command is: %d, Size %c%c\n", dataBuffer[2],dataBuffer[0], dataBuffer[1]); break;
  8000f16:	68bb      	ldr	r3, [r7, #8]
  8000f18:	3302      	adds	r3, #2
  8000f1a:	781b      	ldrb	r3, [r3, #0]
@@ -2073,7 +2064,7 @@ int main(void)
  8000f2a:	4822      	ldr	r0, [pc, #136]	; (8000fb4 <main+0x170>)
  8000f2c:	f7ff fb26 	bl	800057c <BTL_SendMessage>
  8000f30:	e03d      	b.n	8000fae <main+0x16a>
-		  case BTL_GO_TO_ADDR_CMD: BTL_SendMessage("Sent command is: %d, Size %c%c\n", dataBuffer[2],dataBuffer[0], dataBuffer[1]); break;
+		  case BTL_FLASH_ERASE: BTL_SendMessage("Sent command is: %d, Size %c%c\n", dataBuffer[2],dataBuffer[0], dataBuffer[1]); break;
  8000f32:	68bb      	ldr	r3, [r7, #8]
  8000f34:	3302      	adds	r3, #2
  8000f36:	781b      	ldrb	r3, [r3, #0]
@@ -2087,7 +2078,7 @@ int main(void)
  8000f46:	481b      	ldr	r0, [pc, #108]	; (8000fb4 <main+0x170>)
  8000f48:	f7ff fb18 	bl	800057c <BTL_SendMessage>
  8000f4c:	e02f      	b.n	8000fae <main+0x16a>
-		  case BTL_FLASH_ERASE_CMD: BTL_SendMessage("Sent command is: %d, Size %c%c\n", dataBuffer[2],dataBuffer[0], dataBuffer[1]); break;
+		  case BTL_MEM_READ: BTL_SendMessage("Sent command is: %d, Size %c%c\n", dataBuffer[2],dataBuffer[0], dataBuffer[1]); break;
  8000f4e:	68bb      	ldr	r3, [r7, #8]
  8000f50:	3302      	adds	r3, #2
  8000f52:	781b      	ldrb	r3, [r3, #0]
@@ -2101,7 +2092,7 @@ int main(void)
  8000f62:	4814      	ldr	r0, [pc, #80]	; (8000fb4 <main+0x170>)
  8000f64:	f7ff fb0a 	bl	800057c <BTL_SendMessage>
  8000f68:	e021      	b.n	8000fae <main+0x16a>
-		  case BTL_GET_CID_CMD: BTL_SendMessage("Sent command is: %d, Size %c%c\n", dataBuffer[2],dataBuffer[0], dataBuffer[1]); break;
+		  case BTL_OTP_READ: BTL_SendMessage("Sent command is: %d, Size %c%c\n", dataBuffer[2],dataBuffer[0], dataBuffer[1]); break;
  8000f6a:	68bb      	ldr	r3, [r7, #8]
  8000f6c:	3302      	adds	r3, #2
  8000f6e:	781b      	ldrb	r3, [r3, #0]
@@ -2115,7 +2106,7 @@ int main(void)
  8000f7e:	480d      	ldr	r0, [pc, #52]	; (8000fb4 <main+0x170>)
  8000f80:	f7ff fafc 	bl	800057c <BTL_SendMessage>
  8000f84:	e013      	b.n	8000fae <main+0x16a>
-		  case BTL_MEM_WRITE_CMD: BTL_UpdateFirmware(dataBuffer, dataLength);break;
+		  case BTL_APP_FLASH: BTL_UpdateFirmware(dataBuffer, dataLength);break;
  8000f86:	89fb      	ldrh	r3, [r7, #14]
  8000f88:	4619      	mov	r1, r3
  8000f8a:	68b8      	ldr	r0, [r7, #8]
@@ -2281,8 +2272,6 @@ __STATIC_FORCEINLINE void __disable_irq(void)
  8001080:	b672      	cpsid	i
 }
  8001082:	bf00      	nop
-  /* USER CODE BEGIN Error_Handler_Debug */
-  /* User can add his own implementation to report the HAL error return state */
   __disable_irq();
   while (1)
  8001084:	e7fe      	b.n	8001084 <Error_Handler+0x8>
