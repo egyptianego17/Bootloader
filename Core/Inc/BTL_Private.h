@@ -23,10 +23,10 @@
 #define BTL_RT_0                  6
 #define BTL_RT_1                  7
 
-#define BTL_DATA_0                8
-#define BTL_DATA_1                9
-#define BTL_DATA_2                10
-#define BTL_DATA_3                11
+#define BTL_DATA_0                8 	/* Shift of 1st Data digit from the start of the record */
+#define BTL_DATA_1                9  	/* Shift of 2nd Data digit from the start of the record */
+#define BTL_DATA_2                10	/* Shift of 3rd Data digit from the start of the record */
+#define BTL_DATA_3                11	/* Shift of 4rd Data digit from the start of the record */
 
 #define BTL_FULL_ADD0             0
 #define BTL_FULL_ADD1             1

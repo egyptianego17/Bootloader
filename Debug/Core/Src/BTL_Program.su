@@ -4,8 +4,8 @@
 ../Core/Src/BTL_Program.c:84:19:BTL_SendNAck	16	static
 ../Core/Src/BTL_Program.c:99:19:BTL_GetVersion	16	static
 ../Core/Src/BTL_Program.c:115:19:BTL_UpdateFirmware	32	static
-../Core/Src/BTL_Program.c:207:9:BTL_ASCHIIToHex	16	static
-../Core/Src/BTL_Program.c:231:19:BTL_HexFlasher	40	static
-../Core/Src/BTL_Program.c:312:19:BTL_FlashWrite	32	static
-../Core/Src/BTL_Program.c:346:19:BTL_CheckRecord	40	static
-../Core/Src/BTL_Program.c:379:9:CalculateChecksum	24	static
+../Core/Src/BTL_Program.c:227:9:BTL_ASCHIIToHex	16	static
+../Core/Src/BTL_Program.c:251:19:BTL_HexFlasher	40	static
+../Core/Src/BTL_Program.c:346:19:BTL_FlashWrite	32	static
+../Core/Src/BTL_Program.c:382:19:BTL_CheckRecord	40	static
+../Core/Src/BTL_Program.c:419:9:CalculateChecksum	24	static

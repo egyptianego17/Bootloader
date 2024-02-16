@@ -26,14 +26,14 @@ BTL_StatusTypeDef BTL_SendMessage(char* messageFormat, ...)
     BTL_StatusTypeDef BTL_STATUS = BTL_ERROR;
 
     char message[512] = {0};
-    /* Init va_list to handle the message */
+    /* Initialize va_list to handle the message */
     va_list args;
     va_start(args, messageFormat);
 
-    /* Using vsnprintf to format the message */
+    /* Use vsnprintf to format the message */
     vsnprintf(message, sizeof(message), messageFormat, args);
 
-    /* Transmitting the formatted data to the Host */
+    /* Transmit the formatted data to the Host */
     if (HAL_UART_Transmit(&huart1, (uint8_t*) message, sizeof(message), HAL_MAX_DELAY) == HAL_OK)
     {
         BTL_STATUS = BTL_OK;
@@ -52,7 +52,7 @@ BTL_CMDTypeDef BTL_GetMessage(uint8_t* messageBuffer)
 {
     BTL_CMDTypeDef BTL_CMD = BTL_ERROR_CMD;
 
-    /* Getting the size of the data & command type */
+    /* Get the size of the data & command type */
     if (HAL_UART_Receive(&huart1, (uint8_t*) &messageBuffer[0], 3, HAL_MAX_DELAY) == HAL_OK)
     {
         BTL_CMD = messageBuffer[BTL_CMD_TYPE];
@@ -69,7 +69,7 @@ BTL_CMDTypeDef BTL_GetMessage(uint8_t* messageBuffer)
 BTL_StatusTypeDef BTL_SendAck(BTL_CMDTypeDef cmdID)
 {
     BTL_StatusTypeDef BTL_STATUS = BTL_ERROR;
-    /* Send ID as A*/
+    /* Send ID as A */
     if (BTL_SendMessage("%c", cmdID) == BTL_OK)
     {
         BTL_STATUS = BTL_OK;
@@ -84,7 +84,7 @@ BTL_StatusTypeDef BTL_SendAck(BTL_CMDTypeDef cmdID)
 BTL_StatusTypeDef BTL_SendNAck()
 {
     BTL_StatusTypeDef BTL_STATUS = BTL_ERROR;
-    /* Send ID as A*/
+    /* Send ID as A */
     if (BTL_SendMessage("%c", 0) == BTL_OK)
     {
         BTL_STATUS = BTL_OK;
@@ -117,17 +117,26 @@ BTL_StatusTypeDef BTL_UpdateFirmware(uint8_t* messageBuffer, uint16_t dataLength
     BTL_StatusTypeDef BTL_STATUS = BTL_ERROR;
     BTL_StatusTypeDef BTL_DONE = BTL_ERROR;
 
+    /* Send Acknowledgment MCU ready to flash */
     if (BTL_SendAck(BTL_MEM_WRITE_CMD) != BTL_OK) {
         return BTL_ERROR;
     }
 
+    /* Start to receive packet 1 of program prefixed with some meta data
+     * BTL_DONE_FLAG            0 - is used to indicate if this is the last packet or not
+     * BTL_BUFFER_RECORDS0      1 - is used to know how many records are in the received buffer for iteration
+     * BTL_BUFFER_NEXT_SIZE0    3
+     * BTL_BUFFER_NEXT_SIZE1    4 - is used to know how much data I'll send in the next packet
+     */
     if (HAL_UART_Receive(&huart1, &messageBuffer[BTL_DONE_FLAG], dataLength + 4, HAL_MAX_DELAY) != HAL_OK)
     {
         return BTL_ERROR;
     }
 
+    /* Counter to exit the loop in case of too many failures */
     uint8_t FlashFailure = 0;
 
+    /* Start erasing the flash to be ready to write on it */
     static FLASH_EraseInitTypeDef EraseInitStruct;
     uint32_t SECTOR_ERROR = 0;
 
@@ -140,23 +149,31 @@ BTL_StatusTypeDef BTL_UpdateFirmware(uint8_t* messageBuffer, uint16_t dataLength
 
     HAL_FLASHEx_Erase(&EraseInitStruct, &SECTOR_ERROR);
 
+    /* SECTOR_ERROR == 0xFFFFFFFFU means erasing is done */
     if (SECTOR_ERROR == 0xFFFFFFFFU)
     {
         do
         {
+            /* Update DONE or NOT status */
             BTL_DONE = messageBuffer[BTL_DONE_FLAG];
+
+            /* RecordsData is used to have the current record to be flashed on the memory */
             BTL_RecordTypeDef* RecordsData = malloc(sizeof(BTL_RecordTypeDef));
 
+            /* Check allocation error */
             if (RecordsData == NULL)
             {
                 return BTL_ERROR;
             }
 
+            /* Update the current Records in the packet */
             RecordsData->BTL_NO_OF_BUFFER_RECORDS = messageBuffer[BTL_BUFFER_RECORDS0];
             RecordsData->BTL_RECORD_INDEX = 0;
 
+            /* Start to flash the received packet */
             BTL_StatusTypeDef BTL_FLASH_STATUS = BTL_FlashWrite(&messageBuffer[BTL_DATA_START], dataLength, RecordsData);
 
+            /* Check Flashing status */
             if (BTL_FLASH_STATUS == BTL_OK)
             {
                 BTL_SendAck(BTL_MEM_WRITE_CMD);
@@ -170,16 +187,20 @@ BTL_StatusTypeDef BTL_UpdateFirmware(uint8_t* messageBuffer, uint16_t dataLength
                 break;
             }
 
+            /* Update the dataLength to start to receive the next packet */
             dataLength = (messageBuffer[BTL_BUFFER_NEXT_SIZE0] << 4) | messageBuffer[BTL_BUFFER_NEXT_SIZE1];
 
+            /* Clear the buffer */
             memset(messageBuffer, 0, DATA_BUFFER_SIZE);
 
             free(RecordsData);
 
+            /* If timeout or this is the last packet, then end */
             if ((FlashFailure >= MAX_TIMEOUT) || (BTL_DONE == BTL_OK)) {
                 break;
             }
 
+            /* Start receiving the next packet */
             else if (HAL_UART_Receive(&huart1, &messageBuffer[BTL_CMD_TYPE], dataLength + 4, HAL_MAX_DELAY) != HAL_OK)
             {
                 return BTL_ERROR;
@@ -188,7 +209,6 @@ BTL_StatusTypeDef BTL_UpdateFirmware(uint8_t* messageBuffer, uint16_t dataLength
         } while (BTL_DONE != BTL_OK);
 
     }
-
     else
     {
         BTL_STATUS = BTL_ERROR;
@@ -234,30 +254,36 @@ BTL_StatusTypeDef BTL_HexFlasher(uint8_t* dataBuffer, BTL_RecordTypeDef* current
 
     currentRecord->BTL_ADDRESS_HIGH = 0x0800;
 
+    /* Parsing the Record Type of the current record from the buffer */
     currentRecord->BTL_RECORD_TYPE = BTL_ASCHIIToHex(dataBuffer[currentRecord->BTL_BUFFER_POINTER + BTL_RT_0]) << 4 |
                                      BTL_ASCHIIToHex(dataBuffer[currentRecord->BTL_BUFFER_POINTER + BTL_RT_1]);
 
+    /* Parsing the Character Count of the current record from the buffer */
     currentRecord->BTL_CC = (BTL_ASCHIIToHex(dataBuffer[currentRecord->BTL_BUFFER_POINTER + BTL_CC_0]) << 4) |
                              BTL_ASCHIIToHex(dataBuffer[currentRecord->BTL_BUFFER_POINTER + BTL_CC_1]);
 
+    /* Parsing the CheckSum of the current record from the buffer */
     currentRecord->BTL_CHECKSUM = (BTL_ASCHIIToHex(dataBuffer[currentRecord->BTL_BUFFER_POINTER + currentRecord->BTL_CC*2 + 8]) << 4) |
                                    BTL_ASCHIIToHex(dataBuffer[currentRecord->BTL_BUFFER_POINTER + currentRecord->BTL_CC*2 + 9]);
 
+    /* If End Of The file, then return BTL_OK */
     if (currentRecord->BTL_RECORD_TYPE == BTL_EOF_RECORD_TYPE)
     {
         return BTL_OK;
     }
-
     else if (currentRecord->BTL_RECORD_TYPE == BTL_DATA_RECORD_TYPE)
     {
+        /* Start to parse the address of the current record from the buffer */
         currentRecord->BTL_ADD = ((currentRecord->BTL_ADDRESS_HIGH) << 16) |
                                  ((BTL_ASCHIIToHex(dataBuffer[currentRecord->BTL_BUFFER_POINTER + BTL_ADD_0])) << 12) |
                                  ((BTL_ASCHIIToHex(dataBuffer[currentRecord->BTL_BUFFER_POINTER + BTL_ADD_1])) << 8) |
                                  ((BTL_ASCHIIToHex(dataBuffer[currentRecord->BTL_BUFFER_POINTER + BTL_ADD_2])) << 4) |
                                  BTL_ASCHIIToHex(dataBuffer[currentRecord->BTL_BUFFER_POINTER + BTL_ADD_3]);
 
+        /* Validation of the record */
         if (BTL_CheckRecord(dataBuffer ,currentRecord) == BTL_OK)
         {
+            /* If the record is valid, then start to flash Record Byte by byte */
             for (uint8_t bytesCounter = 0; bytesCounter < currentRecord->BTL_CC; bytesCounter++)
             {
                 currentRecord->BTL_DATA = (BTL_ASCHIIToHex(dataBuffer[currentRecord->BTL_BUFFER_POINTER + BTL_DATA_0 + bytesCounter * 2]) << 4) |
@@ -265,6 +291,8 @@ BTL_StatusTypeDef BTL_HexFlasher(uint8_t* dataBuffer, BTL_RecordTypeDef* current
 
                 BTL_STATUS = HAL_FLASH_Program(FLASH_TYPEPROGRAM_BYTE, currentRecord->BTL_ADD + BTL_BOOTLOADER_SIZE + bytesCounter, currentRecord->BTL_DATA);
             }
+            /* Shift the buffer pointer to point to the start of the next record
+             * 11 = 2 (CC) + 4 (ADD) + 2 (RT) + 2 (CHSUM) + 1 (\n) */
             currentRecord->BTL_BUFFER_POINTER += (currentRecord->BTL_CC) * 2 + 11;
         }
         else
@@ -272,6 +300,7 @@ BTL_StatusTypeDef BTL_HexFlasher(uint8_t* dataBuffer, BTL_RecordTypeDef* current
             return BTL_ERROR;
         }
     }
+    /* Set the high address */
     else if (currentRecord->BTL_RECORD_TYPE == BTL_EXT_LINEAR_ADDR_RECORD)
     {
         currentRecord->BTL_ADDRESS_HIGH = ((BTL_ASCHIIToHex(dataBuffer[currentRecord->BTL_BUFFER_POINTER + BTL_DATA_0])) << 12) |
@@ -279,8 +308,11 @@ BTL_StatusTypeDef BTL_HexFlasher(uint8_t* dataBuffer, BTL_RecordTypeDef* current
                                           ((BTL_ASCHIIToHex(dataBuffer[currentRecord->BTL_BUFFER_POINTER + BTL_DATA_2])) << 4) |
                                           BTL_ASCHIIToHex(dataBuffer[currentRecord->BTL_BUFFER_POINTER + BTL_DATA_3]);
 
+        /* Shift the buffer pointer to point to the start of the next record
+         * 11 = 2 (CC) + 4 (ADD) + 2 (RT) + 2 (CHSUM) + 1 (\n) */
         currentRecord->BTL_BUFFER_POINTER += (currentRecord->BTL_CC) * 2 + 11;
     }
+    /* Set the full address */
     else if (currentRecord->BTL_RECORD_TYPE == BTL_START_LINEAR_ADDR_RECORD)
     {
         currentRecord->BTL_ADD = ((BTL_ASCHIIToHex(dataBuffer[currentRecord->BTL_BUFFER_POINTER + BTL_FULL_ADD0])) << 28) |
@@ -292,6 +324,8 @@ BTL_StatusTypeDef BTL_HexFlasher(uint8_t* dataBuffer, BTL_RecordTypeDef* current
                                  ((BTL_ASCHIIToHex(dataBuffer[currentRecord->BTL_BUFFER_POINTER + BTL_FULL_ADD6])) << 4)  |
                                  BTL_ASCHIIToHex(dataBuffer[currentRecord->BTL_BUFFER_POINTER + BTL_FULL_ADD7]);
 
+        /* Shift the buffer pointer to point to the start of the next record
+         * 11 = 2 (CC) + 4 (ADD) + 2 (RT) + 2 (CHSUM) + 1 (\n) */
         currentRecord->BTL_BUFFER_POINTER += (currentRecord->BTL_CC) * 2 + 11;
     }
     else
@@ -313,10 +347,12 @@ BTL_StatusTypeDef BTL_FlashWrite(uint8_t* dataBuffer, uint16_t dataLength, BTL_R
 {
     BTL_StatusTypeDef BTL_STATUS = BTL_ERROR;
 
+    /* a counter to exit the loop in case of too many failures */
     uint8_t FlashFailure = 0;
 
     currentRecord->BTL_BUFFER_POINTER = 0;
 
+    /* Iterate on until you flash all records received from the packet */
     while (currentRecord->BTL_RECORD_INDEX < currentRecord->BTL_NO_OF_BUFFER_RECORDS)
     {
         if (BTL_HexFlasher(dataBuffer, currentRecord) == BTL_OK)
@@ -346,12 +382,15 @@ BTL_StatusTypeDef BTL_FlashWrite(uint8_t* dataBuffer, uint16_t dataLength, BTL_R
 BTL_StatusTypeDef BTL_CheckRecord(uint8_t* dataBuffer, BTL_RecordTypeDef* currentRecord) {
     BTL_StatusTypeDef BTL_STATUS = BTL_ERROR;
 
+    /* Validate the address and the Character count */
     if ((currentRecord->BTL_ADD >= BTL_MIN_ADDRESS) && (currentRecord->BTL_ADD <= BTL_MAX_ADDRESS) &&
         (currentRecord->BTL_CC >= BTL_MIN_CC) && (currentRecord->BTL_CC <= BTL_MAX_CC))
     {
+        /* Start to calculate and check Checksum received from the PC */
         uint8_t* CRC_Buffer = NULL;
         CRC_Buffer = (uint8_t*)calloc(currentRecord->BTL_CC + 4, sizeof(uint8_t));
 
+        /* Some hard code to calculate the checksum lol */
         for (uint8_t bytesCounter = 0; bytesCounter < currentRecord->BTL_CC + 4; bytesCounter++)
         {
             CRC_Buffer[bytesCounter] = (BTL_ASCHIIToHex(dataBuffer[currentRecord->BTL_BUFFER_POINTER + bytesCounter * 2]) << 4) |
@@ -360,6 +399,7 @@ BTL_StatusTypeDef BTL_CheckRecord(uint8_t* dataBuffer, BTL_RecordTypeDef* curren
 
         uint8_t mcuCHECKSUM = CalculateChecksum(CRC_Buffer, currentRecord->BTL_CC + 4);
 
+        /* If equal, then done */
         if (mcuCHECKSUM == currentRecord->BTL_CHECKSUM) {
             BTL_STATUS = BTL_OK;
         }
