@@ -77,7 +77,7 @@ int main(void)
   /* USER CODE BEGIN Init */
   uint8_t* dataBuffer;
   BTL_CMDTypeDef receivedCMD;
-  uint16_t dataLength = NULL;
+  uint16_t dataLength = 0;
   dataBuffer = (uint8_t*)calloc(DATA_BUFFER_SIZE, sizeof(uint8_t));   /* 2 Kb Buffer to hold the messages */
   /* USER CODE END Init */
 
@@ -102,10 +102,15 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
+
+	  /* Clear the buffer before reception  */
 	  memset(dataBuffer, 0, DATA_BUFFER_SIZE);
+
+	  /* Getting command type from the host */
 	  receivedCMD = BTL_GetMessage(dataBuffer);
 	  if (receivedCMD != BTL_ERROR_CMD)
 	  {
+
 		  dataLength = dataBuffer[BTL_DATA_SIZE0] << 4 | dataBuffer[BTL_DATA_SIZE1];
 		  switch(receivedCMD)
 		  {

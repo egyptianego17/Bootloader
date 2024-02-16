@@ -29,23 +29,23 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY
  12 .comment      00000043  00000000  00000000  0002008c  2**0
                   CONTENTS, READONLY
- 13 .debug_info   00009475  00000000  00000000  000200cf  2**0
+ 13 .debug_info   00009478  00000000  00000000  000200cf  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_abbrev 0000204b  00000000  00000000  00029544  2**0
+ 14 .debug_abbrev 0000204b  00000000  00000000  00029547  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_aranges 000008c8  00000000  00000000  0002b590  2**3
+ 15 .debug_aranges 000008c8  00000000  00000000  0002b598  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_rnglists 00000691  00000000  00000000  0002be58  2**0
+ 16 .debug_rnglists 00000691  00000000  00000000  0002be60  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_macro  00016333  00000000  00000000  0002c4e9  2**0
+ 17 .debug_macro  00016333  00000000  00000000  0002c4f1  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_line   0000c278  00000000  00000000  0004281c  2**0
+ 18 .debug_line   0000c278  00000000  00000000  00042824  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_str    00085c75  00000000  00000000  0004ea94  2**0
+ 19 .debug_str    00085c75  00000000  00000000  0004ea9c  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .debug_frame  00002708  00000000  00000000  000d470c  2**2
+ 20 .debug_frame  00002708  00000000  00000000  000d4714  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_line_str 0000006a  00000000  00000000  000d6e14  2**0
+ 21 .debug_line_str 0000006a  00000000  00000000  000d6e1c  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -540,7 +540,7 @@ BTL_StatusTypeDef BTL_SendAck(BTL_CMDTypeDef cmdID)
     BTL_StatusTypeDef BTL_STATUS = BTL_ERROR;
  8000642:	2301      	movs	r3, #1
  8000644:	73fb      	strb	r3, [r7, #15]
-    /* Send ID as A */
+    /* Send cmd ID as Acknowledgment */
     if (BTL_SendMessage("%c", cmdID) == BTL_OK)
  8000646:	79fb      	ldrb	r3, [r7, #7]
  8000648:	4619      	mov	r1, r3
@@ -639,7 +639,7 @@ BTL_StatusTypeDef BTL_GetVersion()
 080006c4 <BTL_UpdateFirmware>:
  * @param messageBuffer Buffer containing the firmware update data.
  * @param dataLength Length of the data in the buffer.
- * @return BTL_StatusTypeDef Status of the firmware update.
+ * @return BTL_StatusTypeDef Status of the firmware update operation.
  */
 BTL_StatusTypeDef BTL_UpdateFirmware(uint8_t* messageBuffer, uint16_t dataLength)
 {
@@ -656,7 +656,7 @@ BTL_StatusTypeDef BTL_UpdateFirmware(uint8_t* messageBuffer, uint16_t dataLength
  80006d4:	2301      	movs	r3, #1
  80006d6:	75bb      	strb	r3, [r7, #22]
 
-    /* Send Acknowledgment MCU ready to flash */
+    /* Transmit an acknowledgment to signal MCU readiness for flashing */
     if (BTL_SendAck(BTL_MEM_WRITE_CMD) != BTL_OK) {
  80006d8:	2016      	movs	r0, #22
  80006da:	f7ff ffad 	bl	8000638 <BTL_SendAck>
@@ -666,10 +666,10 @@ BTL_StatusTypeDef BTL_UpdateFirmware(uint8_t* messageBuffer, uint16_t dataLength
         return BTL_ERROR;
  80006e4:	2301      	movs	r3, #1
  80006e6:	e08c      	b.n	8000802 <BTL_UpdateFirmware+0x13e>
-     * BTL_DONE_FLAG            0 - is used to indicate if this is the last packet or not
-     * BTL_BUFFER_RECORDS0      1 - is used to know how many records are in the received buffer for iteration
+     * BTL_DONE_FLAG            0 - Indicates if this is the last packet or not.
+     * BTL_BUFFER_RECORDS0      1 - Indicates how many records are in the received buffer for iteration.
      * BTL_BUFFER_NEXT_SIZE0    3
-     * BTL_BUFFER_NEXT_SIZE1    4 - is used to know how much data I'll send in the next packet
+     * BTL_BUFFER_NEXT_SIZE1    4 - Indicates how much data will be sent in the next packet.
      */
     if (HAL_UART_Receive(&huart1, &messageBuffer[BTL_DONE_FLAG], dataLength + 4, HAL_MAX_DELAY) != HAL_OK)
  80006e8:	687b      	ldr	r3, [r7, #4]
@@ -684,7 +684,7 @@ BTL_StatusTypeDef BTL_UpdateFirmware(uint8_t* messageBuffer, uint16_t dataLength
  80006fe:	2b00      	cmp	r3, #0
  8000700:	d001      	beq.n	8000706 <BTL_UpdateFirmware+0x42>
     {
-        return BTL_ERROR;
+        return BTL_ERROR; /* Return error if packet reception fails */
  8000702:	2301      	movs	r3, #1
  8000704:	e07d      	b.n	8000802 <BTL_UpdateFirmware+0x13e>
     }
@@ -694,7 +694,7 @@ BTL_StatusTypeDef BTL_UpdateFirmware(uint8_t* messageBuffer, uint16_t dataLength
  8000706:	2300      	movs	r3, #0
  8000708:	757b      	strb	r3, [r7, #21]
 
-    /* Start erasing the flash to be ready to write on it */
+    /* Start erasing the flash to prepare for writing */
     static FLASH_EraseInitTypeDef EraseInitStruct;
     uint32_t SECTOR_ERROR = 0;
  800070a:	2300      	movs	r3, #0
@@ -726,7 +726,7 @@ BTL_StatusTypeDef BTL_UpdateFirmware(uint8_t* messageBuffer, uint16_t dataLength
  8000730:	4837      	ldr	r0, [pc, #220]	; (8000810 <BTL_UpdateFirmware+0x14c>)
  8000732:	f001 f963 	bl	80019fc <HAL_FLASHEx_Erase>
 
-    /* SECTOR_ERROR == 0xFFFFFFFFU means erasing is done */
+    /* If SECTOR_ERROR == 0xFFFFFFFFU, erasing is complete */
     if (SECTOR_ERROR == 0xFFFFFFFFU)
  8000736:	68bb      	ldr	r3, [r7, #8]
  8000738:	f1b3 3fff 	cmp.w	r3, #4294967295
@@ -734,14 +734,14 @@ BTL_StatusTypeDef BTL_UpdateFirmware(uint8_t* messageBuffer, uint16_t dataLength
     {
         do
         {
-            /* Update DONE or NOT status */
+        	/* Update the status indicating whether the process is complete or ongoing */
             BTL_DONE = messageBuffer[BTL_DONE_FLAG];
  800073e:	687b      	ldr	r3, [r7, #4]
  8000740:	3303      	adds	r3, #3
  8000742:	781b      	ldrb	r3, [r3, #0]
  8000744:	75bb      	strb	r3, [r7, #22]
 
-            /* RecordsData is used to have the current record to be flashed on the memory */
+            /* RecordsData holds the current record for writing to memory */
             BTL_RecordTypeDef* RecordsData = malloc(sizeof(BTL_RecordTypeDef));
  8000746:	2014      	movs	r0, #20
  8000748:	f002 fd16 	bl	8003178 <malloc>
@@ -759,7 +759,7 @@ BTL_StatusTypeDef BTL_UpdateFirmware(uint8_t* messageBuffer, uint16_t dataLength
  8000758:	e053      	b.n	8000802 <BTL_UpdateFirmware+0x13e>
             }
 
-            /* Update the current Records in the packet */
+            /* Update information about the current records in the packet */
             RecordsData->BTL_NO_OF_BUFFER_RECORDS = messageBuffer[BTL_BUFFER_RECORDS0];
  800075a:	687b      	ldr	r3, [r7, #4]
  800075c:	791a      	ldrb	r2, [r3, #4]
@@ -770,7 +770,7 @@ BTL_StatusTypeDef BTL_UpdateFirmware(uint8_t* messageBuffer, uint16_t dataLength
  8000764:	2200      	movs	r2, #0
  8000766:	819a      	strh	r2, [r3, #12]
 
-            /* Start to flash the received packet */
+            /* Initiate flashing for the received packet. */
             BTL_StatusTypeDef BTL_FLASH_STATUS = BTL_FlashWrite(&messageBuffer[BTL_DATA_START], dataLength, RecordsData);
  8000768:	687b      	ldr	r3, [r7, #4]
  800076a:	3307      	adds	r3, #7
@@ -781,7 +781,7 @@ BTL_StatusTypeDef BTL_UpdateFirmware(uint8_t* messageBuffer, uint16_t dataLength
  8000776:	4603      	mov	r3, r0
  8000778:	73fb      	strb	r3, [r7, #15]
 
-            /* Check Flashing status */
+            /* Check for any allocation errors */
             if (BTL_FLASH_STATUS == BTL_OK)
  800077a:	7bfb      	ldrb	r3, [r7, #15]
  800077c:	2b00      	cmp	r3, #0
@@ -797,7 +797,7 @@ BTL_StatusTypeDef BTL_UpdateFirmware(uint8_t* messageBuffer, uint16_t dataLength
                 break;
             }
 
-            /* Update the dataLength to start to receive the next packet */
+            /** Update the dataLength to begin receiving the next packet. */
             dataLength = (messageBuffer[BTL_BUFFER_NEXT_SIZE0] << 4) | messageBuffer[BTL_BUFFER_NEXT_SIZE1];
  800078a:	687b      	ldr	r3, [r7, #4]
  800078c:	3305      	adds	r3, #5
@@ -812,7 +812,7 @@ BTL_StatusTypeDef BTL_UpdateFirmware(uint8_t* messageBuffer, uint16_t dataLength
  800079e:	b21b      	sxth	r3, r3
  80007a0:	807b      	strh	r3, [r7, #2]
 
-            /* Clear the buffer */
+            /* Clear the messageBuffer to prepare for receiving the next packet. */
             memset(messageBuffer, 0, DATA_BUFFER_SIZE);
  80007a2:	f44f 6200 	mov.w	r2, #2048	; 0x800
  80007a6:	2100      	movs	r1, #0
@@ -823,7 +823,7 @@ BTL_StatusTypeDef BTL_UpdateFirmware(uint8_t* messageBuffer, uint16_t dataLength
  80007ae:	6938      	ldr	r0, [r7, #16]
  80007b0:	f002 fcea 	bl	8003188 <free>
 
-            /* If timeout or this is the last packet, then end */
+            /* Check for timeout or the last packet; if true, end the process. */
             if ((FlashFailure >= MAX_TIMEOUT) || (BTL_DONE == BTL_OK)) {
  80007b4:	7d7b      	ldrb	r3, [r7, #21]
  80007b6:	2b04      	cmp	r3, #4
@@ -847,7 +847,7 @@ BTL_StatusTypeDef BTL_UpdateFirmware(uint8_t* messageBuffer, uint16_t dataLength
                 break;
             }
 
-            /* Start receiving the next packet */
+            /** Start the reception of the next packet. */
             else if (HAL_UART_Receive(&huart1, &messageBuffer[BTL_CMD_TYPE], dataLength + 4, HAL_MAX_DELAY) != HAL_OK)
  80007d2:	687b      	ldr	r3, [r7, #4]
  80007d4:	1c99      	adds	r1, r3, #2
@@ -979,7 +979,7 @@ BTL_StatusTypeDef BTL_HexFlasher(uint8_t* dataBuffer, BTL_RecordTypeDef* current
  8000878:	f44f 6200 	mov.w	r2, #2048	; 0x800
  800087c:	821a      	strh	r2, [r3, #16]
 
-    /* Parsing the Record Type of the current record from the buffer */
+    /* Parse the Record Type of the current record from the buffer */
     currentRecord->BTL_RECORD_TYPE = BTL_ASCHIIToHex(dataBuffer[currentRecord->BTL_BUFFER_POINTER + BTL_RT_0]) << 4 |
  800087e:	683b      	ldr	r3, [r7, #0]
  8000880:	89db      	ldrh	r3, [r3, #14]
@@ -1010,7 +1010,7 @@ BTL_StatusTypeDef BTL_HexFlasher(uint8_t* dataBuffer, BTL_RecordTypeDef* current
  80008b2:	683b      	ldr	r3, [r7, #0]
  80008b4:	721a      	strb	r2, [r3, #8]
 
-    /* Parsing the Character Count of the current record from the buffer */
+    /* Parse the Character Count of the current record from the buffer */
     currentRecord->BTL_CC = (BTL_ASCHIIToHex(dataBuffer[currentRecord->BTL_BUFFER_POINTER + BTL_CC_0]) << 4) |
  80008b6:	683b      	ldr	r3, [r7, #0]
  80008b8:	89db      	ldrh	r3, [r3, #14]
@@ -1041,7 +1041,7 @@ BTL_StatusTypeDef BTL_HexFlasher(uint8_t* dataBuffer, BTL_RecordTypeDef* current
  80008ea:	683b      	ldr	r3, [r7, #0]
  80008ec:	701a      	strb	r2, [r3, #0]
 
-    /* Parsing the CheckSum of the current record from the buffer */
+    /* Parse the CheckSum of the current record from the buffer */
     currentRecord->BTL_CHECKSUM = (BTL_ASCHIIToHex(dataBuffer[currentRecord->BTL_BUFFER_POINTER + currentRecord->BTL_CC*2 + 8]) << 4) |
  80008ee:	683b      	ldr	r3, [r7, #0]
  80008f0:	89db      	ldrh	r3, [r3, #14]
@@ -1099,7 +1099,7 @@ BTL_StatusTypeDef BTL_HexFlasher(uint8_t* dataBuffer, BTL_RecordTypeDef* current
  800094a:	2b00      	cmp	r3, #0
  800094c:	f040 8090 	bne.w	8000a70 <BTL_HexFlasher+0x208>
     {
-        /* Start to parse the address of the current record from the buffer */
+        /* Begin parsing the address of the current record from the buffer */
         currentRecord->BTL_ADD = ((currentRecord->BTL_ADDRESS_HIGH) << 16) |
  8000950:	683b      	ldr	r3, [r7, #0]
  8000952:	8a1b      	ldrh	r3, [r3, #16]
@@ -1160,7 +1160,7 @@ BTL_StatusTypeDef BTL_HexFlasher(uint8_t* dataBuffer, BTL_RecordTypeDef* current
  80009b6:	683b      	ldr	r3, [r7, #0]
  80009b8:	605a      	str	r2, [r3, #4]
 
-        /* Validation of the record */
+        /* Validate the record */
         if (BTL_CheckRecord(dataBuffer ,currentRecord) == BTL_OK)
  80009ba:	6839      	ldr	r1, [r7, #0]
  80009bc:	6878      	ldr	r0, [r7, #4]
@@ -1169,7 +1169,7 @@ BTL_StatusTypeDef BTL_HexFlasher(uint8_t* dataBuffer, BTL_RecordTypeDef* current
  80009c4:	2b00      	cmp	r3, #0
  80009c6:	d151      	bne.n	8000a6c <BTL_HexFlasher+0x204>
         {
-            /* If the record is valid, then start to flash Record Byte by byte */
+            /* If the record is valid, then start flashing Record Byte by byte */
             for (uint8_t bytesCounter = 0; bytesCounter < currentRecord->BTL_CC; bytesCounter++)
  80009c8:	2300      	movs	r3, #0
  80009ca:	73bb      	strb	r3, [r7, #14]
@@ -1516,7 +1516,7 @@ BTL_StatusTypeDef BTL_FlashWrite(uint8_t* dataBuffer, uint16_t dataLength, BTL_R
  8000c06:	2301      	movs	r3, #1
  8000c08:	75fb      	strb	r3, [r7, #23]
 
-    /* a counter to exit the loop in case of too many failures */
+    /* Counter to exit the loop in case of too many failures */
     uint8_t FlashFailure = 0;
  8000c0a:	2300      	movs	r3, #0
  8000c0c:	75bb      	strb	r3, [r7, #22]
@@ -1526,7 +1526,7 @@ BTL_StatusTypeDef BTL_FlashWrite(uint8_t* dataBuffer, uint16_t dataLength, BTL_R
  8000c10:	2200      	movs	r2, #0
  8000c12:	81da      	strh	r2, [r3, #14]
 
-    /* Iterate on until you flash all records received from the packet */
+    /* Iterate until all records received from the packet are flashed */
     while (currentRecord->BTL_RECORD_INDEX < currentRecord->BTL_NO_OF_BUFFER_RECORDS)
  8000c14:	e017      	b.n	8000c46 <BTL_FlashWrite+0x4e>
     {
@@ -1601,7 +1601,7 @@ BTL_StatusTypeDef BTL_CheckRecord(uint8_t* dataBuffer, BTL_RecordTypeDef* curren
  8000c6a:	2301      	movs	r3, #1
  8000c6c:	75fb      	strb	r3, [r7, #23]
 
-    /* Validate the address and the Character count */
+    /* Validate the address and the character count */
     if ((currentRecord->BTL_ADD >= BTL_MIN_ADDRESS) && (currentRecord->BTL_ADD <= BTL_MAX_ADDRESS) &&
  8000c6e:	683b      	ldr	r3, [r7, #0]
  8000c70:	685b      	ldr	r3, [r3, #4]
@@ -1618,7 +1618,7 @@ BTL_StatusTypeDef BTL_CheckRecord(uint8_t* dataBuffer, BTL_RecordTypeDef* curren
  8000c86:	2b10      	cmp	r3, #16
  8000c88:	d84f      	bhi.n	8000d2a <BTL_CheckRecord+0xca>
     {
-        /* Start to calculate and check Checksum received from the PC */
+        /* Calculate and check the checksum received from the PC */
         uint8_t* CRC_Buffer = NULL;
  8000c8a:	2300      	movs	r3, #0
  8000c8c:	613b      	str	r3, [r7, #16]
@@ -1632,7 +1632,7 @@ BTL_StatusTypeDef BTL_CheckRecord(uint8_t* dataBuffer, BTL_RecordTypeDef* curren
  8000c9c:	4603      	mov	r3, r0
  8000c9e:	613b      	str	r3, [r7, #16]
 
-        /* Some hard code to calculate the checksum lol */
+        /* Calculate the checksum using some hard-code lol */
         for (uint8_t bytesCounter = 0; bytesCounter < currentRecord->BTL_CC + 4; bytesCounter++)
  8000ca0:	2300      	movs	r3, #0
  8000ca2:	75bb      	strb	r3, [r7, #22]
@@ -1699,7 +1699,7 @@ BTL_StatusTypeDef BTL_CheckRecord(uint8_t* dataBuffer, BTL_RecordTypeDef* curren
  8000d12:	4603      	mov	r3, r0
  8000d14:	73fb      	strb	r3, [r7, #15]
 
-        /* If equal, then done */
+        /* If the calculated checksum matches the received checksum, the validation is successful */
         if (mcuCHECKSUM == currentRecord->BTL_CHECKSUM) {
  8000d16:	683b      	ldr	r3, [r7, #0]
  8000d18:	7a9b      	ldrb	r3, [r3, #10]
@@ -1765,7 +1765,7 @@ uint8_t CalculateChecksum(const uint8_t *data, size_t length)
  8000d68:	d3f0      	bcc.n	8000d4c <CalculateChecksum+0x14>
     }
 
-    // Take 2's complement of the least significant 8 bits
+    /* Take 2's complement of the least significant 8 bits */
     return (uint8_t)(~sum + 1);
  8000d6a:	89fb      	ldrh	r3, [r7, #14]
  8000d6c:	b2db      	uxtb	r3, r3
@@ -1946,7 +1946,7 @@ int main(void)
   /* USER CODE BEGIN Init */
   uint8_t* dataBuffer;
   BTL_CMDTypeDef receivedCMD;
-  uint16_t dataLength = NULL;
+  uint16_t dataLength = 0;
  8000e4e:	2300      	movs	r3, #0
  8000e50:	81fb      	strh	r3, [r7, #14]
   dataBuffer = (uint8_t*)calloc(DATA_BUFFER_SIZE, sizeof(uint8_t));   /* 2 Kb Buffer to hold the messages */
@@ -1973,16 +1973,18 @@ int main(void)
  8000e6c:	f000 f9bc 	bl	80011e8 <MX_USART2_UART_Init>
   MX_CRC_Init();
  8000e70:	f7ff ff86 	bl	8000d80 <MX_CRC_Init>
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
   while (1)
   {
     /* USER CODE END WHILE */
+
+	  /* Clear the buffer before reception  */
 	  memset(dataBuffer, 0, DATA_BUFFER_SIZE);
  8000e74:	f44f 6200 	mov.w	r2, #2048	; 0x800
  8000e78:	2100      	movs	r1, #0
  8000e7a:	68b8      	ldr	r0, [r7, #8]
  8000e7c:	f002 fa72 	bl	8003364 <memset>
+
+	  /* Getting command type from the host */
 	  receivedCMD = BTL_GetMessage(dataBuffer);
  8000e80:	68b8      	ldr	r0, [r7, #8]
  8000e82:	f7ff fbbd 	bl	8000600 <BTL_GetMessage>
@@ -1993,6 +1995,7 @@ int main(void)
  8000e8c:	2b22      	cmp	r3, #34	; 0x22
  8000e8e:	d0f1      	beq.n	8000e74 <main+0x30>
 	  {
+
 		  dataLength = dataBuffer[BTL_DATA_SIZE0] << 4 | dataBuffer[BTL_DATA_SIZE1];
  8000e90:	68bb      	ldr	r3, [r7, #8]
  8000e92:	781b      	ldrb	r3, [r3, #0]

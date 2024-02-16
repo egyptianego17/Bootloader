@@ -8,10 +8,7 @@
 #ifndef INC_BTL_PRIVATE_H_
 #define INC_BTL_PRIVATE_H_
 
-#define BTL_V_MAJOR '1'
-#define BTL_V_MINOR '1'
-#define BTL_V_PATCH '1'
-
+/* Bit positions for various fields in a record */
 #define BTL_CC_0                  0
 #define BTL_CC_1                  1
 
@@ -23,10 +20,10 @@
 #define BTL_RT_0                  6
 #define BTL_RT_1                  7
 
-#define BTL_DATA_0                8 	/* Shift of 1st Data digit from the start of the record */
-#define BTL_DATA_1                9  	/* Shift of 2nd Data digit from the start of the record */
-#define BTL_DATA_2                10	/* Shift of 3rd Data digit from the start of the record */
-#define BTL_DATA_3                11	/* Shift of 4rd Data digit from the start of the record */
+#define BTL_DATA_0                8
+#define BTL_DATA_1                9
+#define BTL_DATA_2                10
+#define BTL_DATA_3                11
 
 #define BTL_FULL_ADD0             0
 #define BTL_FULL_ADD1             1
@@ -37,6 +34,7 @@
 #define BTL_FULL_ADD6             6
 #define BTL_FULL_ADD7             7
 
+/* Bit positions for various fields in a dataBuffer */
 #define BTL_CMD_TYPE              2
 
 #define BTL_BUFFER_RECORDS0       4
@@ -48,8 +46,7 @@
 
 #define BTL_DATA_START            7
 
-#define MAX_TIMEOUT               5
-
+/* Some MCU and Bootloader related data */
 #define BTL_BOOTLOADER_SIZE       0x8000 /* 32 Kilobyte */
 
 #define BTL_MIN_ADDRESS 		  0x08000000
@@ -58,26 +55,36 @@
 #define BTL_MIN_CC 		          0x00
 #define BTL_MAX_CC 		          0x10
 
+#define MAX_TIMEOUT               5
+
+/* Version Information */
+#define BTL_V_MAJOR '1'
+#define BTL_V_MINOR '1'
+#define BTL_V_PATCH '1'
+
+/* Structure to hold information about the record being processed */
 typedef struct
 {
-  uint8_t BTL_CC;
-  uint32_t BTL_ADD;
-  uint8_t  BTL_RECORD_TYPE;
-  uint8_t BTL_DATA;
-  uint8_t BTL_CHECKSUM;
-  uint16_t BTL_RECORD_INDEX;
-  uint16_t BTL_BUFFER_POINTER;
-  uint16_t BTL_ADDRESS_HIGH;
-  uint8_t BTL_NO_OF_BUFFER_RECORDS;
+  uint8_t BTL_CC;                   /* Character count field of the record */
+  uint32_t BTL_ADD;                 /* Address field of the record */
+  uint8_t  BTL_RECORD_TYPE;         /* Record type field of the record */
+  uint8_t BTL_DATA;                 /* Byte data field of the record */
+  uint8_t BTL_CHECKSUM;             /* Checksum field of the record */
+  uint16_t BTL_RECORD_INDEX;        /* Index indicating the position of the record in the data buffer */
+  uint16_t BTL_BUFFER_POINTER;      /* Pointer to the start of current record */
+  uint16_t BTL_ADDRESS_HIGH;        /* High bytes of the address field in the record */
+  uint8_t BTL_NO_OF_BUFFER_RECORDS; /* Number of records in the received buffer for iteration */
 } BTL_RecordTypeDef;
 
+
+/* Enumeration for Bootloader Status */
 typedef enum
 {
   BTL_OK       = 0x00U,
   BTL_ERROR    = 0x01U,
 } BTL_StatusTypeDef;
 
-
+/* Enumeration for Record Types */
 typedef enum
 {
   BTL_DATA_RECORD_TYPE           = 0x00U, /* Data Record */
@@ -87,7 +94,7 @@ typedef enum
   BTL_START_LINEAR_ADDR_RECORD   = 0x05U, /* Start Linear Address Record (MDK-ARM only) */
 } BTL_RecordTypeTypeDef;
 
-
+/* Enumeration for Bootloader Commands */
 typedef enum
 {
 	BTL_GET_VER_CMD              = 0x10U,
@@ -104,6 +111,5 @@ typedef enum
 	BTL_CHANGE_ROP_Level_CMD     = 0x21U,
 	BTL_ERROR_CMD                = 0x22U,
 } BTL_CMDTypeDef;
-
 
 #endif /* INC_BTL_PRIVATE_H_ */

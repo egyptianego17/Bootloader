@@ -3,9 +3,9 @@
 ../Core/Src/BTL_Program.c:69:19:BTL_SendAck	2
 ../Core/Src/BTL_Program.c:84:19:BTL_SendNAck	2
 ../Core/Src/BTL_Program.c:99:19:BTL_GetVersion	2
-../Core/Src/BTL_Program.c:115:19:BTL_UpdateFirmware	10
-../Core/Src/BTL_Program.c:227:9:BTL_ASCHIIToHex	7
-../Core/Src/BTL_Program.c:251:19:BTL_HexFlasher	7
-../Core/Src/BTL_Program.c:346:19:BTL_FlashWrite	4
-../Core/Src/BTL_Program.c:382:19:BTL_CheckRecord	6
-../Core/Src/BTL_Program.c:419:9:CalculateChecksum	2
+../Core/Src/BTL_Program.c:120:19:BTL_UpdateFirmware	10
+../Core/Src/BTL_Program.c:232:9:BTL_ASCHIIToHex	7
+../Core/Src/BTL_Program.c:256:19:BTL_HexFlasher	7
+../Core/Src/BTL_Program.c:351:19:BTL_FlashWrite	4
+../Core/Src/BTL_Program.c:387:19:BTL_CheckRecord	6
+../Core/Src/BTL_Program.c:424:9:CalculateChecksum	2
